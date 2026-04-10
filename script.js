@@ -1,5 +1,5 @@
 /* =============================================
-   LEDGER — Expense Tracker
+   SPENDEE — Expense Tracker
    script.js — Modular Vanilla JS
    ============================================= */
 
@@ -44,9 +44,9 @@ const State = (() => {
    ============================================= */
 const Storage = {
   KEYS: {
-    transactions: 'ledger_transactions',
-    budget:       'ledger_budget',
-    theme:        'ledger_theme'
+    transactions: 'spendee_transactions',
+    budget:       'spendee_budget',
+    theme:        'spendee_theme'
   },
 
   load() {
@@ -734,7 +734,7 @@ const Exporter = {
     const url     = URL.createObjectURL(blob);
     const a       = document.createElement('a');
     a.href        = url;
-    a.download    = `ledger_export_${Utils.today()}.csv`;
+    a.download    = `spendee_export_${Utils.today()}.csv`;
     a.click();
     URL.revokeObjectURL(url);
     UI.toast('✓ CSV exported');
