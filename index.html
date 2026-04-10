@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ledger — Personal Finance Tracker</title>
+  <link rel="stylesheet" href="style.css" />
+  <!-- Fonts: Fraunces (display) + DM Sans (body) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;0,600;1,300&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+  <!-- ===== SIDEBAR NAV ===== -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">
+        <span class="logo-icon">◈</span>
+        <span class="logo-text">Ledger</span>
+      </div>
+      <button class="sidebar-close" id="sidebarClose" aria-label="Close menu">✕</button>
+    </div>
+
+    <nav class="sidebar-nav">
+      <button class="nav-item active" data-view="dashboard">
+        <span class="nav-icon">⬡</span>
+        <span>Dashboard</span>
+      </button>
+      <button class="nav-item" data-view="transactions">
+        <span class="nav-icon">⇄</span>
+        <span>Transactions</span>
+      </button>
+      <button class="nav-item" data-view="charts">
+        <span class="nav-icon">◎</span>
+        <span>Analytics</span>
+      </button>
+      <button class="nav-item" data-view="budget">
+        <span class="nav-icon">◐</span>
+        <span>Budget</span>
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+        <span class="theme-icon" id="themeIcon">◑</span>
+        <span id="themeLabel">Dark Mode</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ===== OVERLAY (mobile) ===== -->
+  <div class="overlay" id="overlay"></div>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <main class="main" id="main">
+
+    <!-- Top Bar -->
+    <header class="topbar">
+      <button class="menu-btn" id="menuBtn" aria-label="Open menu">
+        <span></span><span></span><span></span>
+      </button>
+      <div class="topbar-title" id="topbarTitle">Dashboard</div>
+      <div class="topbar-actions">
+        <button class="btn-export" id="exportBtn" title="Export CSV">
+          <span>↓</span> Export
+        </button>
+        <button class="btn-add-top" id="addBtnTop" title="Add Transaction">＋</button>
+      </div>
+    </header>
+
+    <!-- ===== VIEW: DASHBOARD ===== -->
+    <section class="view active" id="view-dashboard">
+
+      <!-- Summary Cards -->
+      <div class="summary-grid">
+        <div class="summary-card balance">
+          <div class="card-label">Net Balance</div>
+          <div class="card-amount" id="totalBalance">₹0.00</div>
+          <div class="card-sub" id="balanceSub">No transactions yet</div>
+        </div>
+        <div class="summary-card income">
+          <div class="card-label">Total Income</div>
+          <div class="card-amount" id="totalIncome">₹0.00</div>
+          <div class="card-sub" id="incomeSub">This month</div>
+        </div>
+        <div class="summary-card expense">
+          <div class="card-label">Total Expenses</div>
+          <div class="card-amount" id="totalExpense">₹0.00</div>
+          <div class="card-sub" id="expenseSub">This month</div>
+        </div>
+      </div>
+
+      <!-- Budget Quick Widget -->
+      <div class="budget-widget" id="budgetWidget">
+        <div class="bw-header">
+          <span class="bw-label">Monthly Budget</span>
+          <span class="bw-amounts" id="bwAmounts">—</span>
+        </div>
+        <div class="bw-bar-wrap">
+          <div class="bw-bar" id="bwBar"></div>
+        </div>
+        <div class="bw-status" id="bwStatus">Set a budget in the Budget tab</div>
+      </div>
+
+      <!-- Recent Transactions -->
+      <div class="section-header">
+        <h2 class="section-title">Recent Transactions</h2>
+        <button class="link-btn" data-view="transactions">View all →</button>
+      </div>
+      <div class="tx-list" id="recentList">
+        <div class="empty-state" id="dashEmptyState">
+          <div class="empty-icon">◈</div>
+          <p>No transactions yet.<br>Add your first one!</p>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ===== VIEW: TRANSACTIONS ===== -->
+    <section class="view" id="view-transactions">
+
+      <!-- Filters -->
+      <div class="filters-bar">
+        <div class="search-wrap">
+          <span class="search-icon">⊕</span>
+          <input type="text" id="searchInput" placeholder="Search transactions…" class="filter-input search-input" />
+        </div>
+        <select id="filterCategory" class="filter-select">
+          <option value="">All Categories</option>
+          <option value="food">🍜 Food</option>
+          <option value="transport">🚌 Transport</option>
+          <option value="shopping">🛍️ Shopping</option>
+          <option value="bills">💡 Bills</option>
+          <option value="entertainment">🎬 Entertainment</option>
+          <option value="health">💊 Health</option>
+          <option value="salary">💼 Salary</option>
+          <option value="others">📦 Others</option>
+        </select>
+        <select id="filterType" class="filter-select">
+          <option value="">All Types</option>
+          <option value="income">Income</option>
+          <option value="expense">Expense</option>
+        </select>
+        <input type="date" id="filterFrom" class="filter-input" title="From date" />
+        <input type="date" id="filterTo" class="filter-input" title="To date" />
+        <button class="btn-clear-filters" id="clearFilters">✕ Clear</button>
+      </div>
+
+      <!-- Transaction List -->
+      <div class="tx-list full" id="fullList">
+        <div class="empty-state" id="txEmptyState">
+          <div class="empty-icon">⇄</div>
+          <p>No transactions found.<br>Try adjusting filters.</p>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ===== VIEW: CHARTS ===== -->
+    <section class="view" id="view-charts">
+      <div class="charts-grid">
+        <div class="chart-card wide">
+          <div class="chart-title">Monthly Overview</div>
+          <canvas id="monthlyChart"></canvas>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">Expense by Category</div>
+          <canvas id="categoryChart"></canvas>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">Income vs Expense</div>
+          <canvas id="donutChart"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== VIEW: BUDGET ===== -->
+    <section class="view" id="view-budget">
+      <div class="budget-section">
+        <div class="budget-set-card">
+          <h3 class="budget-set-title">Set Monthly Budget</h3>
+          <div class="budget-input-row">
+            <span class="budget-currency">₹</span>
+            <input type="number" id="budgetInput" placeholder="0.00" class="budget-amount-input" min="0" />
+            <button class="btn-primary" id="saveBudgetBtn">Save Budget</button>
+          </div>
+        </div>
+
+        <div class="budget-status-card" id="budgetStatusCard">
+          <div class="bs-row">
+            <span class="bs-label">Budget Set</span>
+            <span class="bs-val" id="bsBudget">—</span>
+          </div>
+          <div class="bs-row">
+            <span class="bs-label">Total Spent</span>
+            <span class="bs-val expense-color" id="bsSpent">—</span>
+          </div>
+          <div class="bs-row">
+            <span class="bs-label">Remaining</span>
+            <span class="bs-val" id="bsRemaining">—</span>
+          </div>
+
+          <div class="budget-progress-wrap">
+            <div class="budget-progress-bar" id="budgetProgressBar"></div>
+          </div>
+          <div class="budget-progress-label" id="budgetProgressLabel"></div>
+
+          <div class="budget-alert" id="budgetAlert"></div>
+        </div>
+
+        <!-- Category budgets breakdown -->
+        <h3 class="budget-set-title" style="margin-top:2rem;">Spending by Category (This Month)</h3>
+        <div class="category-breakdown" id="categoryBreakdown"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ===== ADD / EDIT MODAL ===== -->
+  <div class="modal-backdrop" id="modalBackdrop">
+    <div class="modal" id="txModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modalTitle">Add Transaction</h3>
+        <button class="modal-close" id="modalClose">✕</button>
+      </div>
+
+      <!-- Income / Expense Toggle -->
+      <div class="type-toggle">
+        <button class="toggle-btn active" data-type="expense" id="toggleExpense">Expense</button>
+        <button class="toggle-btn" data-type="income" id="toggleIncome">Income</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Amount <span class="req">*</span></label>
+          <div class="amount-wrap">
+            <span class="currency-sym">₹</span>
+            <input type="number" id="txAmount" placeholder="0.00" class="form-input" min="0.01" step="0.01" />
+          </div>
+          <div class="field-error" id="amountError"></div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Category <span class="req">*</span></label>
+          <select id="txCategory" class="form-select">
+            <option value="">Select category</option>
+            <option value="food">🍜 Food</option>
+            <option value="transport">🚌 Transport</option>
+            <option value="shopping">🛍️ Shopping</option>
+            <option value="bills">💡 Bills</option>
+            <option value="entertainment">🎬 Entertainment</option>
+            <option value="health">💊 Health</option>
+            <option value="salary">💼 Salary</option>
+            <option value="others">📦 Others</option>
+          </select>
+          <div class="field-error" id="categoryError"></div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Date <span class="req">*</span></label>
+            <input type="date" id="txDate" class="form-input" />
+            <div class="field-error" id="dateError"></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Notes</label>
+            <input type="text" id="txNotes" placeholder="Optional note…" class="form-input" maxlength="80" />
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-secondary" id="modalCancel">Cancel</button>
+        <button class="btn-primary" id="modalSave">Add Transaction</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== DELETE CONFIRM MODAL ===== -->
+  <div class="modal-backdrop" id="deleteBackdrop">
+    <div class="modal confirm-modal" role="dialog" aria-modal="true">
+      <div class="modal-header">
+        <h3 class="modal-title">Delete Transaction?</h3>
+      </div>
+      <p class="confirm-text">This action cannot be undone.</p>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="deleteCancelBtn">Cancel</button>
+        <button class="btn-danger" id="deleteConfirmBtn">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="toast"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
